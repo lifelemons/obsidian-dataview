@@ -63,6 +63,9 @@
     background-color: rgba(255, 255, 255, 0.8);
     border: 0.2px solid rgba(145, 145, 145, 0.5);
     padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 3px;
+    margin-top: 3px;
     font-size: inherit;
     text-align: left;
     white-space: nowrap;
