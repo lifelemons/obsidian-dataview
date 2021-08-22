@@ -86,6 +86,39 @@ export async function renderCalendar(container: HTMLElement, elements: LiteralVa
 	}
 }
 
+export async function renderCalendarGrid(container: HTMLElement, elements: LiteralValue[], component: Component, originFile: string,
+	settings: QuerySettings) {
+	let listEl = container.createDiv({cls: ['grid-container', 'calendar-view']});
+
+	var currentDate = new Date();
+	var currentYear = currentDate.getFullYear();
+	var currentMonth = currentDate.getMonth();
+	//var currentDay 
+	var numberOfDays = new Date(currentYear, currentMonth, 0).getDate();
+
+	var firstDay = new Date(currentYear, currentMonth, 1).getDay(); // gives Sunday = 0 to Saturday = 6
+	var lastDay = new Date(currentYear, currentMonth + 1, 0).getDay(); // gives Sunday = 0 to Saturday = 6
+	if (firstDay == 0) firstDay = 7; // turn Sunday to final day in a week
+	if (lastDay == 0) lastDay = 7;
+
+	var weekStartDate = currentDate
+	weekStartDate.setDate(weekStartDate.getDate() - firstDay + 1);
+	for(var dayNumber:number = 1; dayNumber <= 7; dayNumber++){
+		weekStartDate.setDate(weekStartDate.getDate() + 1 );
+		//listEl.createDiv({cls: ['grid-item', 'calendar-item'], value: weekStartDate.toLocaleString(currentLocale(), {  weekday: 'long' }) });
+		listEl.createDiv({cls: ['grid-item', 'calendar-item'], text: weekStartDate.toLocaleString(currentLocale(), {  weekday: 'long' }) });
+	}
+	for(var dayNumber:number = 1; dayNumber < firstDay; dayNumber++){
+		listEl.createDiv({cls: ['grid-item', 'calendar-item']});
+	}
+	for(var dayNumber:number = 1; dayNumber <= numberOfDays; dayNumber++){
+		listEl.createDiv({cls: ['grid-item', 'calendar-item'], text: dayNumber.toString()});
+	}
+	for(var dayNumber:number = lastDay; dayNumber < 7; dayNumber++){
+		listEl.createDiv({cls: ['grid-item', 'calendar-item']});
+	}
+}
+
 /** Render a pre block with an error in it; returns the element to allow for dynamic updating. */
 export function renderErrorPre(container: HTMLElement, error: string): HTMLElement {
     let pre = container.createEl("pre", { cls: ["dataview", "dataview-error"] });

@@ -11,7 +11,7 @@ import {
     TAbstractFile,
     TFile,
 } from "obsidian";
-import { renderErrorPre, renderList, renderTable, renderCalendar, renderValue } from "ui/render";
+import { renderErrorPre, renderList, renderTable, renderCalendar, renderCalendarGrid, renderValue } from "ui/render";
 import { FullIndex } from "data/index";
 import * as Tasks from "ui/tasks";
 import { ListQuery, Query, TableQuery } from "query/query";
@@ -655,7 +655,7 @@ class DataviewCalendarRenderer extends MarkdownRenderChild {
             }
         }
 
-        await renderCalendar(this.container, rendered, this, this.origin, this.settings);
+        await renderCalendarGrid(this.container, rendered, this, this.origin, this.settings);
 	}
 }
 
