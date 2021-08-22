@@ -37,7 +37,7 @@
 .calendar-view {
     display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  background-color: #2196F3;
+  background-color: #9ebbd3;
   padding: 10px;
 
 }
@@ -48,6 +48,7 @@
     padding: 10px;
     font-size: 12px;
     text-align: center;
+    white-space: nowrap;
   } 
 
 .calendar-day-view {
@@ -56,5 +57,4 @@
   grid-template-rows: repeat(3, minmax(0, 1fr));
   background-color: #2195f393;
   padding: 0px;
-
 }

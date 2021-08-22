@@ -27,6 +27,7 @@ import { DataviewSettings, DEFAULT_QUERY_SETTINGS, DEFAULT_SETTINGS } from "./se
 import { LiteralValue } from "./data/value";
 import { DateTime } from "luxon";
 import { currentLocale } from "./util/locale";
+import { TableExecution} from "query/engine"
 
 export default class DataviewPlugin extends Plugin {
     /** Plugin-wide default settigns. */
@@ -645,33 +646,69 @@ class DataviewCalendarRenderer extends MarkdownRenderChild {
 		});
 	}
 
-	async render() {
+    executeDayTables(): LiteralValue[][][] {
 
-        let dayQurey = parseQuery(
+        let dayTables: LiteralValue[][][] = [];
+
+        let dayQureys: Query[] = [];
+
+        // for loop here over day range
+        let dayQurey0 = parseQuery(
+            "TABLE file.ctime\n" +
+                "WHERE file.ctime <= date(2020-04)\n"
+        ).orElseThrow();
+
+        let dayQurey1 = parseQuery(
+            "TABLE file.ctime\n" +
+                "WHERE file.ctime <= date(yesterday)\n"
+        ).orElseThrow();
+
+        let dayQurey2 = parseQuery(
             "TABLE file.ctime\n" +
                 "WHERE file.ctime >= date(today)\n"
         ).orElseThrow();
 
-        let maybeResult = tryOrPropogate(() => executeTable(dayQurey, this.index, this.origin, this.settings));
+        var  yesterdayDate = DateTime.now().day - 1;
+        var  todayDate = DateTime.now().day;
 
+        // for(var dayNumber:number = 1; dayNumber < yesterdayDate; dayNumber++){
+        //     dayQureys.push(dayQurey0);
+        // }
 
-        if (!maybeResult.successful) {
-            renderErrorPre(this.container, "Dataview: " + maybeResult.error);
-            return;
+        for(var dayNumber:number = yesterdayDate; dayNumber <= todayDate; dayNumber++){
+            dayQureys.push(dayQurey1);
+            dayQureys.push(dayQurey2);
+        }
+        
+        // for(var dayNumber:number = todayDate; dayNumber <= DateTime.now().daysInMonth; dayNumber++){
+        //     dayQureys.push(dayQurey0);
+        // }
+
+        for (let dayQurey of dayQureys) {
+            let maybeResult = tryOrPropogate(() => executeTable(dayQurey, this.index, this.origin, this.settings));
+            if (!maybeResult.successful) {
+                renderErrorPre(this.container, "Dataview: " + maybeResult.error);
+            }
+            let result = maybeResult.value;
+
+            let dataWithNames: LiteralValue[][] = [];
+            for (let entry of result.data) {
+                dataWithNames.push([entry.id].concat(entry.values));
+            }
+
+            dayTables.push(dataWithNames);
         }
 
-        let result = maybeResult.value;
+        return dayTables;
+    }
 
-        let dataWithNames: LiteralValue[][] = [];
-        for (let entry of result.data) {
-            dataWithNames.push([entry.id].concat(entry.values));
-        }
-        let name = result.idMeaning.type === "group" ? "Group" : "File";
+	async render() {
+
+        let dayTables = this.executeDayTables();
 
         await renderCalendarGrid(
             this.container,
-            [name].concat(result.names),
-            dataWithNames,
+            dayTables,
             this,
             this.origin,
             this.settings

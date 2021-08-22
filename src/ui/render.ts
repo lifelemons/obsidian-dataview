@@ -89,8 +89,7 @@ export async function renderCalendar(container: HTMLElement, elements: LiteralVa
 
 export async function renderCalendarGrid(
     container: HTMLElement,
-    headers: string[],
-    values: LiteralValue[][],
+    dayTables: LiteralValue[][][],
     component: Component,
     originFile: string,
     settings: QuerySettings
@@ -108,6 +107,8 @@ export async function renderCalendarGrid(
 	if (firstDay == 0) firstDay = 7; // turn Sunday to final day in a week
 	if (lastDay == 0) lastDay = 7;
 
+    var renderDay = 0;
+    
 	var weekStartDate = currentDate
 	weekStartDate.setDate(weekStartDate.getDate() - firstDay + 1);
 	for(var dayNumber:number = 1; dayNumber <= 7; dayNumber++){
@@ -119,21 +120,32 @@ export async function renderCalendarGrid(
 		listEl.createDiv({cls: ['grid-item', 'calendar-item']});
 	}
 	for(var dayNumber:number = 1; dayNumber <= numberOfDays; dayNumber++){
-		listEl.createDiv({cls: ['grid-item', 'calendar-item'], text: dayNumber.toString()});
+		let daycontainer = listEl.createDiv({cls: ['grid-item', 'calendar-item'], text: dayNumber.toString()});
+        daycontainer.createDiv({cls: ['grid-container', 'calendar-day-view']});
+        if (dayNumber == currentDate.getDate()) {
+            for (let row of dayTables[1]) {
+                console.log(row)
+                let rowEl = daycontainer.createDiv({cls: ['grid-item']});
+    
+                await renderValue(row[0], rowEl, originFile, component, settings, true);
+                
+            }
+        }
+
 	}
     console.log("here")
 	for(var dayNumber:number = lastDay; dayNumber < 7; dayNumber++){
         let daycontainer = listEl.createDiv({cls: ['grid-item', 'calendar-item']});
-        daycontainer.createDiv({cls: ['grid-container', 'calendar-day-view']});
+        //daycontainer.createDiv({cls: ['grid-container', 'calendar-day-view']});
         //daycontainer.createDiv({cls: ['grid-item', 'calendar-item'], text: "asds"});
-        for (let row of values) {
-            console.log(row)
-            let rowEl = daycontainer.createDiv({cls: ['grid-item']});
+    //     for (let row of values) {
+    //         console.log(row)
+    //         let rowEl = daycontainer.createDiv({cls: ['grid-item']});
 
-            await renderValue(row[0], rowEl, originFile, component, settings, true);
+    //         await renderValue(row[0], rowEl, originFile, component, settings, true);
             
-        }
-	}
+    //     }
+	 }
 }
 
 /** Render a pre block with an error in it; returns the element to allow for dynamic updating. */
