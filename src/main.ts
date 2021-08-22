@@ -572,13 +572,27 @@ class DataviewTableRenderer extends MarkdownRenderChild {
     }
 
     async render() {
-        let maybeResult = tryOrPropogate(() => executeTable(this.query, this.index, this.origin, this.settings));
+
+        let dayQurey = parseQuery(
+            "TABLE file.ctime\n" +
+                "WHERE file.ctime >= date(today)\n"
+        ).orElseThrow();
+
+        let maybeResult = tryOrPropogate(() => executeTable(dayQurey, this.index, this.origin, this.settings));
+
+        console.log(this.query.header.type);
+        console.log(this.query.source.type);
+        console.log(this.query.operations);
+
         if (!maybeResult.successful) {
             renderErrorPre(this.container, "Dataview: " + maybeResult.error);
             return;
         }
 
         let result = maybeResult.value;
+
+        console.log(result);
+
 
         if ((this.query.header as TableQuery).showId) {
             let dataWithNames: LiteralValue[][] = [];
@@ -632,30 +646,36 @@ class DataviewCalendarRenderer extends MarkdownRenderChild {
 	}
 
 	async render() {
-		let maybeResult = tryOrPropogate(() => executeList(this.query, this.index, this.origin, this.settings));
-		if (!maybeResult.successful) {
-			renderErrorPre(this.container, "Dataview: " + maybeResult.error);
-            return;
-		} else if (maybeResult.value.data.length == 0 && this.settings.warnOnEmptyResult) {
-			renderErrorPre(this.container, "Dataview: Query returned 0 results.");
-            return;
-		}
-        let result = maybeResult.value;
-        let rendered: LiteralValue[] = [];
-        for (let row of result.data) {
-            if (row.value) {
-                let span = document.createElement('span');
-                await renderValue(row.primary, span, this.origin, this, this.settings, false, 'list');
-                span.appendText(": ");
-                await renderValue(row.value, span, this.origin, this, this.settings, true, 'list');
 
-                rendered.push(span);
-            } else {
-                rendered.push(row.primary);
-            }
+        let dayQurey = parseQuery(
+            "TABLE file.ctime\n" +
+                "WHERE file.ctime >= date(today)\n"
+        ).orElseThrow();
+
+        let maybeResult = tryOrPropogate(() => executeTable(dayQurey, this.index, this.origin, this.settings));
+
+
+        if (!maybeResult.successful) {
+            renderErrorPre(this.container, "Dataview: " + maybeResult.error);
+            return;
         }
 
-        await renderCalendarGrid(this.container, rendered, this, this.origin, this.settings);
+        let result = maybeResult.value;
+
+        let dataWithNames: LiteralValue[][] = [];
+        for (let entry of result.data) {
+            dataWithNames.push([entry.id].concat(entry.values));
+        }
+        let name = result.idMeaning.type === "group" ? "Group" : "File";
+
+        await renderCalendarGrid(
+            this.container,
+            [name].concat(result.names),
+            dataWithNames,
+            this,
+            this.origin,
+            this.settings
+        )
 	}
 }
 

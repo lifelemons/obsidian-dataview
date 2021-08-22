@@ -68,6 +68,7 @@ export async function renderTable(
 
     let tbodyEl = tableEl.createEl("tbody", { cls: "table-view-tbody" });
     for (let row of values) {
+        console.log(row)
         let rowEl = tbodyEl.createEl("tr");
         for (let value of row) {
             let td = rowEl.createEl("td");
@@ -86,8 +87,14 @@ export async function renderCalendar(container: HTMLElement, elements: LiteralVa
 	}
 }
 
-export async function renderCalendarGrid(container: HTMLElement, elements: LiteralValue[], component: Component, originFile: string,
-	settings: QuerySettings) {
+export async function renderCalendarGrid(
+    container: HTMLElement,
+    headers: string[],
+    values: LiteralValue[][],
+    component: Component,
+    originFile: string,
+    settings: QuerySettings
+) {
 	let listEl = container.createDiv({cls: ['grid-container', 'calendar-view']});
 
 	var currentDate = new Date();
@@ -114,8 +121,18 @@ export async function renderCalendarGrid(container: HTMLElement, elements: Liter
 	for(var dayNumber:number = 1; dayNumber <= numberOfDays; dayNumber++){
 		listEl.createDiv({cls: ['grid-item', 'calendar-item'], text: dayNumber.toString()});
 	}
+    console.log("here")
 	for(var dayNumber:number = lastDay; dayNumber < 7; dayNumber++){
-		listEl.createDiv({cls: ['grid-item', 'calendar-item']});
+        let daycontainer = listEl.createDiv({cls: ['grid-item', 'calendar-item']});
+        daycontainer.createDiv({cls: ['grid-container', 'calendar-day-view']});
+        //daycontainer.createDiv({cls: ['grid-item', 'calendar-item'], text: "asds"});
+        for (let row of values) {
+            console.log(row)
+            let rowEl = daycontainer.createDiv({cls: ['grid-item']});
+
+            await renderValue(row[0], rowEl, originFile, component, settings, true);
+            
+        }
 	}
 }
 

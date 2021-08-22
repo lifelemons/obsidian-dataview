@@ -49,3 +49,12 @@
     font-size: 12px;
     text-align: center;
   } 
+
+.calendar-day-view {
+    display: grid;
+    grid-template-columns: auto;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  background-color: #2195f393;
+  padding: 0px;
+
+}
