@@ -114,18 +114,18 @@ export async function renderCalendarGrid(
 	for(var dayNumber:number = 1; dayNumber <= 7; dayNumber++){
 		weekStartDate.setDate(weekStartDate.getDate() + 1 );
 		//listEl.createDiv({cls: ['grid-item', 'calendar-item'], value: weekStartDate.toLocaleString(currentLocale(), {  weekday: 'long' }) });
-		listEl.createDiv({cls: ['grid-item', 'calendar-item'], text: weekStartDate.toLocaleString(currentLocale(), {  weekday: 'long' }) });
+		listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer'], text: weekStartDate.toLocaleString(currentLocale(), {  weekday: 'long' }) });
 	}
 	for(var dayNumber:number = 1; dayNumber < firstDay; dayNumber++){
-		listEl.createDiv({cls: ['grid-item', 'calendar-item']});
+		listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer']});
 	}
 	for(var dayNumber:number = 1; dayNumber <= numberOfDays; dayNumber++){
-		let daycontainer = listEl.createDiv({cls: ['grid-item', 'calendar-item'], text: dayNumber.toString()});
+		let daycontainer = listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer'], text: dayNumber.toString()});
         daycontainer.createDiv({cls: ['grid-container', 'calendar-day-view']});
         if (dayNumber == currentDate.getDate()) {
             for (let row of dayTables[1]) {
                 console.log(row)
-                let rowEl = daycontainer.createDiv({cls: ['grid-item']});
+                let rowEl = daycontainer.createDiv({cls: ['grid-item', 'calendar-item']});
     
                 await renderValue(row[0], rowEl, originFile, component, settings, true);
                 
@@ -135,7 +135,7 @@ export async function renderCalendarGrid(
 	}
     console.log("here")
 	for(var dayNumber:number = lastDay; dayNumber < 7; dayNumber++){
-        let daycontainer = listEl.createDiv({cls: ['grid-item', 'calendar-item']});
+        let daycontainer = listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer']});
         //daycontainer.createDiv({cls: ['grid-container', 'calendar-day-view']});
         //daycontainer.createDiv({cls: ['grid-item', 'calendar-item'], text: "asds"});
     //     for (let row of values) {

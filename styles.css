@@ -37,24 +37,35 @@
 .calendar-view {
     display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  background-color: #9ebbd3;
-  padding: 10px;
+  background-color: #ffffff;
+  padding: 0px;
+  
 
 }
 
-.calendar-item {
+.calendar-day-view-outer {
     background-color: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(0, 0, 0, 0.8);
-    padding: 10px;
-    font-size: 12px;
+    border: 0.2px solid rgba(145, 145, 145, 0.5);
+    padding: 2px;
+    font-size: inherit;
     text-align: center;
-    white-space: nowrap;
-  } 
+} 
 
 .calendar-day-view {
     display: grid;
     grid-template-columns: auto;
   grid-template-rows: repeat(3, minmax(0, 1fr));
-  background-color: #2195f393;
+  background-color: #ffffffff;
   padding: 0px;
 }
+
+.calendar-item {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 0.2px solid rgba(145, 145, 145, 0.5);
+    padding: 5px;
+    font-size: inherit;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+} 
