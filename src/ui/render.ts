@@ -76,6 +76,16 @@ export async function renderTable(
     }
 }
 
+/** Create a table inside the given container, with the given data. */
+export async function renderCalendar(container: HTMLElement, elements: LiteralValue[], component: Component, originFile: string,
+	settings: QuerySettings) {
+	let listEl = container.createEl('ul', { cls: ['dataview', 'list-view-ul'] });
+	for (let elem of elements) {
+		let li = listEl.createEl('li');
+		await renderValue(elem, li, originFile, component, settings, true, 'list');
+	}
+}
+
 /** Render a pre block with an error in it; returns the element to allow for dynamic updating. */
 export function renderErrorPre(container: HTMLElement, error: string): HTMLElement {
     let pre = container.createEl("pre", { cls: ["dataview", "dataview-error"] });

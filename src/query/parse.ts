@@ -47,9 +47,9 @@ interface QueryLanguageTypes {
 export const QUERY_LANGUAGE = P.createLanguage<QueryLanguageTypes>({
     // Simple atom parsing, like words, identifiers, numbers.
     queryType: q =>
-        P.alt<string>(P.regexp(/TABLE|LIST|TASK/i))
+        P.alt<string>(P.regexp(/TABLE|CALENDAR|LIST|TASK/i))
             .map(str => str.toLowerCase() as QueryType)
-            .desc("query type ('TABLE', 'LIST', or 'TASK')"),
+            .desc("query type ('TABLE', 'CALENDAR', 'LIST', or 'TASK')"),
     explicitNamedField: q =>
         P.seqMap(
             EXPRESSION.field.skip(P.whitespace),
@@ -88,6 +88,20 @@ export const QUERY_LANGUAGE = P.createLanguage<QueryLanguageTypes>({
                         P.sepBy(q.namedField, P.string(",").trim(P.optWhitespace)),
                         (withoutId, fields) => {
                             return { type: "table", fields, showId: withoutId.length == 0 } as QueryHeader;
+                        }
+                    );
+                case "calendar":
+                    return P.seqMap(
+                        P.regexp(/WITHOUT\s+ID/i)
+                            .skip(P.optWhitespace)
+                            .atMost(1),
+                        EXPRESSION.field.atMost(1),
+                        (withoutId, format) => {
+                            return {
+                                type: "calendar",
+                                format: format.length == 1 ? format[0] : undefined,
+                                showId: withoutId.length == 0,
+                            };
                         }
                     );
                 case "list":

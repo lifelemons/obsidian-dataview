@@ -11,7 +11,7 @@ import {
     TAbstractFile,
     TFile,
 } from "obsidian";
-import { renderErrorPre, renderList, renderTable, renderValue } from "ui/render";
+import { renderErrorPre, renderList, renderTable, renderCalendar, renderValue } from "ui/render";
 import { FullIndex } from "data/index";
 import * as Tasks from "ui/tasks";
 import { ListQuery, Query, TableQuery } from "query/query";
@@ -113,6 +113,16 @@ export default class DataviewPlugin extends Plugin {
                         )
                     );
                     break;
+                case "calendar":
+                        ctx.addChild(
+                            this.wrapWithEnsureIndex(
+                                ctx,
+                                el,
+                                () =>
+                                    new DataviewCalendarRenderer(query as Query, el, this.index, ctx.sourcePath, this.settings)
+                            )
+                        );
+                        break;
             }
         });
 
@@ -601,6 +611,52 @@ class DataviewTableRenderer extends MarkdownRenderChild {
             renderErrorPre(this.container, "Dataview: Query returned 0 results.");
         }
     }
+}
+
+class DataviewCalendarRenderer extends MarkdownRenderChild {
+	constructor(public query: Query,
+		public container: HTMLElement,
+		public index: FullIndex,
+		public origin: string,
+		public settings: DataviewSettings) {
+		super(container);
+	}
+
+	async onload() {
+		await this.render();
+
+        onIndexChange(this.index, this.settings.refreshInterval, this, async () => {
+			this.container.innerHTML = "";
+			await this.render();
+		});
+	}
+
+	async render() {
+		let maybeResult = tryOrPropogate(() => executeList(this.query, this.index, this.origin, this.settings));
+		if (!maybeResult.successful) {
+			renderErrorPre(this.container, "Dataview: " + maybeResult.error);
+            return;
+		} else if (maybeResult.value.data.length == 0 && this.settings.warnOnEmptyResult) {
+			renderErrorPre(this.container, "Dataview: Query returned 0 results.");
+            return;
+		}
+        let result = maybeResult.value;
+        let rendered: LiteralValue[] = [];
+        for (let row of result.data) {
+            if (row.value) {
+                let span = document.createElement('span');
+                await renderValue(row.primary, span, this.origin, this, this.settings, false, 'list');
+                span.appendText(": ");
+                await renderValue(row.value, span, this.origin, this, this.settings, true, 'list');
+
+                rendered.push(span);
+            } else {
+                rendered.push(row.primary);
+            }
+        }
+
+        await renderCalendar(this.container, rendered, this, this.origin, this.settings);
+	}
 }
 
 class DataviewTaskRenderer extends MarkdownRenderChild {

@@ -3,7 +3,7 @@ import { Source } from "data/source";
 import { Field } from "expression/field";
 
 /** The supported query types (corresponding to view types). */
-export type QueryType = "list" | "table" | "task";
+export type QueryType = "list" | "table" | "task" | "calendar";
 
 /** Fields used in the query portion. */
 export interface NamedField {
@@ -59,7 +59,14 @@ export interface TaskQuery {
     type: "task";
 }
 
-export type QueryHeader = ListQuery | TableQuery | TaskQuery;
+/** A query which renders a table of elements. */
+export interface CalendarQuery {
+    type: 'calendar';
+    /** What should be rendered in the list. */
+    format?: Field;
+}
+
+export type QueryHeader = ListQuery | TableQuery | TaskQuery | CalendarQuery;
 
 export interface WhereStep {
     type: "where";
