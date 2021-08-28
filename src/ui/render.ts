@@ -97,35 +97,22 @@ export async function renderCalendarGrid(
 	let listEl = container.createDiv({cls: ['grid-container', 'calendar-view']});
 
 	var currentDate = DateTime.now();
-    console.log(currentDate);
-	var currentYear = currentDate.year;
-	var currentMonth = currentDate.month;
-	//var currentDay 
-	var numberOfDays = new Date(currentYear, currentMonth, 0).getDate();
-
-	var firstDay = new Date(currentYear, currentMonth, 1).getDay(); // gives Sunday = 0 to Saturday = 6
-	var lastDay = new Date(currentYear, currentMonth + 1, 0).getDay(); // gives Sunday = 0 to Saturday = 6
-	if (firstDay == 0) firstDay = 7; // turn Sunday to final day in a week
-	if (lastDay == 0) lastDay = 7;
-
-    var renderDay = 0;
+	var firstDay = currentDate.minus({days: currentDate.day - 1});
+	var lastDay = firstDay.plus({days: DateTime.now().daysInMonth - 1}); // gives Sunday = 0 to Saturday = 6
     
-	var weekStartDate = new Date();
-	weekStartDate.setDate(weekStartDate.getDate() - firstDay + 1);
+    var startOfWeek = currentDate.minus({days: currentDate.weekday});
+    console.log(startOfWeek);
 	for(var dayNumber:number = 1; dayNumber <= 7; dayNumber++){
-		weekStartDate.setDate(weekStartDate.getDate() + 1 );
-		//listEl.createDiv({cls: ['grid-item', 'calendar-item'], value: weekStartDate.toLocaleString(currentLocale(), {  weekday: 'long' }) });
-		listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer'], text: weekStartDate.toLocaleString(currentLocale(), {  weekday: 'long' }) });
+		listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer'], text: startOfWeek.plus({days: dayNumber}).weekdayLong });
 	}
-	for(var dayNumber:number = 1; dayNumber < firstDay; dayNumber++){
+	for(var dayNumber:number = 1; dayNumber < firstDay.weekday; dayNumber++){
 		listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer']});
 	}
     console.log(dayTables);
-	for(var dayNumber:number = 1; dayNumber <= numberOfDays; dayNumber++){
+	for(var dayNumber:number = 1; dayNumber <= DateTime.now().daysInMonth; dayNumber++){
 		let daycontainer = listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer'], text: dayNumber.toString()});
         daycontainer.createDiv({cls: ['grid-container', 'calendar-day-view']});
         if (dayTables[dayNumber - 1].length >= 1){
-            //console.log(dayTables[dayNumber - 1]);
 
             for (let row of dayTables[dayNumber - 1]) {
                 //console.log(row)
@@ -137,18 +124,9 @@ export async function renderCalendarGrid(
         }
 
 	}
-    console.log("here")
-	for(var dayNumber:number = lastDay; dayNumber < 7; dayNumber++){
-        let daycontainer = listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer']});
-        //daycontainer.createDiv({cls: ['grid-container', 'calendar-day-view']});
-        //daycontainer.createDiv({cls: ['grid-item', 'calendar-item'], text: "asds"});
-    //     for (let row of values) {
-    //         console.log(row)
-    //         let rowEl = daycontainer.createDiv({cls: ['grid-item']});
 
-    //         await renderValue(row[0], rowEl, originFile, component, settings, true);
-            
-    //     }
+	for(var dayNumber:number = lastDay.weekday + 1; dayNumber <= 7; dayNumber++){
+        listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer']});
 	 }
 }
 
