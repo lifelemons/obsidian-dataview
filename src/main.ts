@@ -637,6 +637,12 @@ class DataviewCalendarRenderer extends MarkdownRenderChild {
 		super(container);
 	}
 
+    pad2(value: number) {
+   
+        return (value < 10 ? '0' : '') + value;
+      
+    }
+
 	async onload() {
 		await this.render();
 
@@ -650,44 +656,30 @@ class DataviewCalendarRenderer extends MarkdownRenderChild {
 
         let dayTables: LiteralValue[][][] = [];
 
-        let dayQureys: Query[] = [];
+        let dayQueries: Query[] = [];
 
-        // for loop here over day range
-        let dayQurey0 = parseQuery(
-            "TABLE file.ctime\n" +
-                "WHERE file.ctime <= date(2020-04)\n"
-        ).orElseThrow();
+        var currentDate = DateTime.now();
+        var currentMonth = currentDate.month;
+        var currentYear = currentDate.year;
+        var numberOfDays = new Date(currentYear, currentMonth, 0).getDate();
 
-        let dayQurey1 = parseQuery(
-            "TABLE file.ctime\n" +
-                "WHERE file.ctime <= date(yesterday)\n"
-        ).orElseThrow();
+        for(var dayNumber:number = 1; dayNumber <= numberOfDays; dayNumber++){
+            var dayQurey_instruction = "TABLE file.ctime\n" + 
+                                        "WHERE file.ctime >= date(" + currentYear + "-" + this.pad2(currentMonth) + "-" + this.pad2(dayNumber)  + ")" 
+                                            + " and " 
+                                            + "file.ctime < date(" + currentYear + "-" + this.pad2(currentMonth) + "-" + this.pad2(dayNumber + 1)  + ")"
+                                            + "\n";
+            let dayQurey = parseQuery(dayQurey_instruction
+                                        ).orElseThrow();
 
-        let dayQurey2 = parseQuery(
-            "TABLE file.ctime\n" +
-                "WHERE file.ctime >= date(today)\n"
-        ).orElseThrow();
-
-        var  yesterdayDate = DateTime.now().day - 1;
-        var  todayDate = DateTime.now().day;
-
-        // for(var dayNumber:number = 1; dayNumber < yesterdayDate; dayNumber++){
-        //     dayQureys.push(dayQurey0);
-        // }
-
-        for(var dayNumber:number = yesterdayDate; dayNumber <= todayDate; dayNumber++){
-            dayQureys.push(dayQurey1);
-            dayQureys.push(dayQurey2);
+            dayQueries.push(dayQurey);
         }
-        
-        // for(var dayNumber:number = todayDate; dayNumber <= DateTime.now().daysInMonth; dayNumber++){
-        //     dayQureys.push(dayQurey0);
-        // }
 
-        for (let dayQurey of dayQureys) {
+        for (let dayQurey of dayQueries) {
             let maybeResult = tryOrPropogate(() => executeTable(dayQurey, this.index, this.origin, this.settings));
             if (!maybeResult.successful) {
-                renderErrorPre(this.container, "Dataview: " + maybeResult.error);
+                //renderErrorPre(this.container, "Dataview: " + maybeResult.error);
+                continue;
             }
             let result = maybeResult.value;
 
@@ -698,7 +690,7 @@ class DataviewCalendarRenderer extends MarkdownRenderChild {
 
             dayTables.push(dataWithNames);
         }
-
+        console.log(dayTables);
         return dayTables;
     }
 

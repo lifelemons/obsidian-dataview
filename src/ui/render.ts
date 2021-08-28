@@ -120,14 +120,17 @@ export async function renderCalendarGrid(
 	for(var dayNumber:number = 1; dayNumber < firstDay; dayNumber++){
 		listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer']});
 	}
+    console.log(dayTables);
 	for(var dayNumber:number = 1; dayNumber <= numberOfDays; dayNumber++){
 		let daycontainer = listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer'], text: dayNumber.toString()});
         daycontainer.createDiv({cls: ['grid-container', 'calendar-day-view']});
-        if (dayNumber == currentDate.day) {
-            for (let row of dayTables[1]) {
-                console.log(row)
+        if (dayTables[dayNumber - 1].length >= 1){
+            //console.log(dayTables[dayNumber - 1]);
+
+            for (let row of dayTables[dayNumber - 1]) {
+                //console.log(row)
                 let rowEl = daycontainer.createDiv({cls: ['grid-item', 'calendar-item']});
-    
+
                 await renderValue(row[0], rowEl, originFile, component, settings, true);
                 
             }
