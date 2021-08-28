@@ -96,7 +96,7 @@ export async function renderCalendarGrid(
     settings: QuerySettings
 ) {
 
-    let calendarEl = container.createDiv({cls: 'calendar-header-view', text: DateTime.now().monthLong});
+    
 
 	
 
@@ -113,6 +113,24 @@ export async function renderCalendarGrid(
     var numberofDayColumns = 7
     if (numberOfDays < 7) numberofDayColumns = numberOfDays;
 
+    var calendarHeaderText = "";
+    if (numberOfDays == firstDay.daysInMonth && firstDay.startOf('month').day == firstDay.day) calendarHeaderText = firstDay.monthLong;
+    else if (numberOfDays == 7 && firstDay.weekday == 1) {
+        calendarHeaderText = firstDay.year + ": W" + firstDay.weekNumber + ", " + firstDay.monthLong;
+    }
+    else if (firstDay.month != lastDay.month) {
+
+        var numberOfMonths = lastDay.month - firstDay.month + 1;
+        for (var i = 0; i < numberOfMonths; i++) {
+            if (i > 0) calendarHeaderText += " - "
+            calendarHeaderText += firstDay.startOf('month').plus({months: i}).monthLong;
+        }
+    }
+    else {
+        calendarHeaderText = firstDay.monthLong;
+    }
+
+    let calendarEl = container.createDiv({cls: 'calendar-header-view', text: calendarHeaderText});
     let listEl = calendarEl.createDiv({cls: ['grid-container', 'calendar-view']});
 
     listEl.style.gridTemplateColumns = "repeat(" + numberofDayColumns + ", minmax(0, 1fr))";
