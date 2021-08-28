@@ -96,9 +96,10 @@ export async function renderCalendarGrid(
 ) {
 	let listEl = container.createDiv({cls: ['grid-container', 'calendar-view']});
 
-	var currentDate = new Date();
-	var currentYear = currentDate.getFullYear();
-	var currentMonth = currentDate.getMonth();
+	var currentDate = DateTime.now();
+    console.log(currentDate);
+	var currentYear = currentDate.year;
+	var currentMonth = currentDate.month;
 	//var currentDay 
 	var numberOfDays = new Date(currentYear, currentMonth, 0).getDate();
 
@@ -109,7 +110,7 @@ export async function renderCalendarGrid(
 
     var renderDay = 0;
     
-	var weekStartDate = currentDate
+	var weekStartDate = new Date();
 	weekStartDate.setDate(weekStartDate.getDate() - firstDay + 1);
 	for(var dayNumber:number = 1; dayNumber <= 7; dayNumber++){
 		weekStartDate.setDate(weekStartDate.getDate() + 1 );
@@ -122,7 +123,7 @@ export async function renderCalendarGrid(
 	for(var dayNumber:number = 1; dayNumber <= numberOfDays; dayNumber++){
 		let daycontainer = listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer'], text: dayNumber.toString()});
         daycontainer.createDiv({cls: ['grid-container', 'calendar-day-view']});
-        if (dayNumber == currentDate.getDate()) {
+        if (dayNumber == currentDate.day) {
             for (let row of dayTables[1]) {
                 console.log(row)
                 let rowEl = daycontainer.createDiv({cls: ['grid-item', 'calendar-item']});
