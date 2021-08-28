@@ -667,6 +667,11 @@ class DataviewCalendarRenderer extends MarkdownRenderChild {
         return Interval.fromDateTimes(currentDate.startOf('week'),  currentDate.endOf('week'));
     }
 
+    dateRangeDefaultWorkWeek(): Interval {
+        var currentDate = DateTime.now();
+        return Interval.fromDateTimes(currentDate.startOf('week'),  currentDate.startOf('week').plus({days: 5}));
+    }
+
     executeDayTables(dateInterval: Interval): LiteralValue[][][] {
 
         let dayTables: LiteralValue[][][] = [];
