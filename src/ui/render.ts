@@ -94,9 +94,13 @@ export async function renderCalendarGrid(
     originFile: string,
     settings: QuerySettings
 ) {
-	let listEl = container.createDiv({cls: ['grid-container', 'calendar-view']});
 
-	var currentDate = DateTime.now();
+    var currentDate = DateTime.now();
+    let calendarEl = container.createDiv({cls: 'calendar-header-view', text: DateTime.now().monthLong});
+
+	let listEl = calendarEl.createDiv({cls: ['grid-container', 'calendar-view']});
+
+	
 	var firstDay = currentDate.minus({days: currentDate.day - 1});
 	var lastDay = firstDay.plus({days: DateTime.now().daysInMonth - 1}); // gives Sunday = 0 to Saturday = 6
     
