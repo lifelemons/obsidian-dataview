@@ -1,4 +1,4 @@
-import { DateTime, Duration } from "luxon";
+import { DateTime, Interval, Duration } from "luxon";
 import { Component, MarkdownRenderer } from "obsidian";
 import { DataArray } from "api/data-array";
 import { QuerySettings } from "settings";
@@ -89,36 +89,64 @@ export async function renderCalendar(container: HTMLElement, elements: LiteralVa
 
 export async function renderCalendarGrid(
     container: HTMLElement,
+    dateInterval: Interval,
     dayTables: LiteralValue[][][],
     component: Component,
     originFile: string,
     settings: QuerySettings
 ) {
 
-    var currentDate = DateTime.now();
     let calendarEl = container.createDiv({cls: 'calendar-header-view', text: DateTime.now().monthLong});
 
-	let listEl = calendarEl.createDiv({cls: ['grid-container', 'calendar-view']});
+	
 
 	
-	var firstDay = currentDate.minus({days: currentDate.day - 1});
-	var lastDay = firstDay.plus({days: DateTime.now().daysInMonth - 1}); // gives Sunday = 0 to Saturday = 6
-    
-    var startOfWeek = currentDate.minus({days: currentDate.weekday});
+	var firstDay = dateInterval.start;
+	var lastDay = dateInterval.end;
+    console.log(firstDay, lastDay);
+    var startOfWeek = dateInterval.start;
     console.log(startOfWeek);
-	for(var dayNumber:number = 1; dayNumber <= 7; dayNumber++){
-		listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer'], text: startOfWeek.plus({days: dayNumber}).weekdayLong });
-	}
-	for(var dayNumber:number = 1; dayNumber < firstDay.weekday; dayNumber++){
-		listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer']});
-	}
-    console.log(dayTables);
-	for(var dayNumber:number = 1; dayNumber <= DateTime.now().daysInMonth; dayNumber++){
-		let daycontainer = listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer'], text: dayNumber.toString()});
-        daycontainer.createDiv({cls: ['grid-container', 'calendar-day-view']});
-        if (dayTables[dayNumber - 1].length >= 1){
+    var numberOfDays = Math.round(dateInterval.toDuration('days').days);
 
-            for (let row of dayTables[dayNumber - 1]) {
+    // a max of 7 columns
+    console.log(firstDay);
+    var numberofDayColumns = 7
+    if (numberOfDays < 7) numberofDayColumns = numberOfDays;
+
+    let listEl = calendarEl.createDiv({cls: ['grid-container', 'calendar-view']});
+
+    listEl.style.gridTemplateColumns = "repeat(" + numberofDayColumns + ", minmax(0, 1fr))";
+    // if its just to view a month
+    if (firstDay.day == 1 && lastDay.day == lastDay.daysInMonth ) {
+
+        for(var i:number = 0; i < numberofDayColumns; i++){
+            listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer'], text: firstDay.startOf('week').plus({days: i}).weekdayLong });
+        }
+
+        // pad days of previous month
+        for(var i:number = 1; i < firstDay.weekday; i++){
+            listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer']});
+        }
+    }
+
+    // any other date range
+    else {
+
+        
+        for(var i:number = 0; i < numberofDayColumns; i++){
+            listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer'], text: firstDay.plus({days: i}).weekdayLong });
+        }
+    }
+
+    console.log(dayTables);
+    
+    var iterationDate = firstDay;
+	for(var i:number = 0; i < numberOfDays; i++){
+		let daycontainer = listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer'], text: iterationDate.day.toString()});
+        daycontainer.createDiv({cls: ['grid-container', 'calendar-day-view']});
+        if (dayTables[i].length >= 1){
+
+            for (let row of dayTables[i]) {
                 //console.log(row)
                 let rowEl = daycontainer.createDiv({cls: ['grid-item', 'calendar-item']});
 
@@ -126,12 +154,15 @@ export async function renderCalendarGrid(
                 
             }
         }
-
+        iterationDate = iterationDate.plus({days: 1});
 	}
 
-	for(var dayNumber:number = lastDay.weekday + 1; dayNumber <= 7; dayNumber++){
-        listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer']});
-	 }
+    // if its just to view a month, pad days of the next month
+    if (lastDay.day == lastDay.daysInMonth && lastDay.weekday != 7) {
+        for(var i:number = 1; i <= 7 - lastDay.weekday; i++){
+            listEl.createDiv({cls: ['grid-item', 'calendar-day-view-outer']});
+        }
+    }
 }
 
 /** Render a pre block with an error in it; returns the element to allow for dynamic updating. */

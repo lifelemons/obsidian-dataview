@@ -25,7 +25,7 @@ import { evalInContext, makeApiContext } from "api/inline-api";
 import { DataviewApi } from "./api/plugin-api";
 import { DataviewSettings, DEFAULT_QUERY_SETTINGS, DEFAULT_SETTINGS } from "./settings";
 import { LiteralValue } from "./data/value";
-import { DateTime } from "luxon";
+import { DateTime, Interval } from "luxon";
 import { currentLocale } from "./util/locale";
 import { TableExecution} from "query/engine"
 
@@ -652,26 +652,41 @@ class DataviewCalendarRenderer extends MarkdownRenderChild {
 		});
 	}
 
-    executeDayTables(): LiteralValue[][][] {
+    dateRangeDefaultMonth(): Interval {
+        var currentDate = DateTime.now();
+        return Interval.fromDateTimes(currentDate.startOf('month'),  currentDate.endOf('month'));
+    }
+
+    dateRangeDefaultMonthPadded(): Interval {
+        var currentDate = DateTime.now();
+        return Interval.fromDateTimes(currentDate.startOf('month').startOf('week'),  currentDate.endOf('month').endOf('week'));
+    }
+
+    dateRangeDefaultWeek(): Interval {
+        var currentDate = DateTime.now();
+        return Interval.fromDateTimes(currentDate.startOf('week'),  currentDate.endOf('week'));
+    }
+
+    executeDayTables(dateInterval: Interval): LiteralValue[][][] {
 
         let dayTables: LiteralValue[][][] = [];
 
         let dayQueries: Query[] = [];
 
-        var currentDate = DateTime.now();
-        var currentMonth = currentDate.month;
-        var currentYear = currentDate.year;
-        var numberOfDays = new Date(currentYear, currentMonth, 0).getDate();
+        var numberOfDays = Math.round(dateInterval.toDuration('days').days);
 
-        for(var dayNumber:number = 1; dayNumber <= numberOfDays; dayNumber++){
+        var iterationDate = dateInterval.start;
+        for(var i:number = 0; i < numberOfDays; i++){
             var dayQurey_instruction = "TABLE file.ctime\n" + 
-                                        "WHERE file.ctime >= date(" + currentYear + "-" + this.pad2(currentMonth) + "-" + this.pad2(dayNumber)  + ")" 
+                                        "WHERE file.ctime >= date(" + iterationDate.year + "-" + this.pad2(iterationDate.month) + "-" + this.pad2(iterationDate.day)  + ")" 
                                             + " and " 
-                                            + "file.ctime < date(" + currentYear + "-" + this.pad2(currentMonth) + "-" + this.pad2(dayNumber + 1)  + ")"
+                                            + "file.ctime < date(" + iterationDate.year + "-" + this.pad2(iterationDate.month) + "-" + this.pad2(iterationDate.day + 1)  + ")"
                                             + "\n";
+            console.log(dayQurey_instruction);                                
             let dayQurey = parseQuery(dayQurey_instruction
                                         ).orElseThrow();
-
+            
+            iterationDate = iterationDate.plus({day: 1});
             dayQueries.push(dayQurey);
         }
 
@@ -696,10 +711,12 @@ class DataviewCalendarRenderer extends MarkdownRenderChild {
 
 	async render() {
 
-        let dayTables = this.executeDayTables();
-
+        var dateInterval = this.dateRangeDefaultMonthPadded();
+        //var dateInterval = Interval.fromDateTimes(DateTime.now(), DateTime.now().plus({days: 1}));
+        let dayTables = this.executeDayTables(dateInterval);
         await renderCalendarGrid(
             this.container,
+            dateInterval,
             dayTables,
             this,
             this.origin,
