@@ -117,6 +117,10 @@ export async function renderCalendarGrid(
     if (numberOfDays == firstDay.daysInMonth && firstDay.startOf('month').day == firstDay.day) calendarHeaderText = firstDay.monthLong;
     else if (numberOfDays == 7 && firstDay.weekday == 1) {
         calendarHeaderText = firstDay.year + ": W" + firstDay.weekNumber + ", " + firstDay.monthLong;
+
+        if (firstDay.month != lastDay.month) {
+            calendarHeaderText +=  " - " + lastDay.monthLong;
+        }
     }
     else if (firstDay.month != lastDay.month) {
 
